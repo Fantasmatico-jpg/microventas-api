@@ -1,4 +1,3 @@
-using app.microCliente.services.Implementations;
 using app.microCliente.common.EventMQ;
 using app.microCliente.dataAccess.context;
 using app.microCliente.dataAccess.repositories;
@@ -47,7 +46,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsEnvironment("Docker"))
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthorization();
 
