@@ -18,7 +18,7 @@ class PedidoService(GenericService):
         try:
             message = {
                 "id": pedido.id,
-                "cliente_direccion_id": pedido.direccion_cliente_id,
+                "cliente_direccion_id": pedido.cliente_direccion_id,
                 "fecha_pedido": str(pedido.fecha_pedido),
                 "total": float(pedido.total)
             }
