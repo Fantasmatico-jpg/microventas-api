@@ -1,0 +1,147 @@
+services:
+
+  # =========================
+  # PostgreSQL - MicroVentas
+  # =========================
+  postgres:
+    image: postgres:16
+    container_name: database-postgres-ventas
+    environment:
+      POSTGRES_DB: MicroVentasDB
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-ventas-data:/var/lib/postgresql/data
+    networks:
+      - microservicios-net
+
+  # =========================
+  # MySQL - MicroProductos
+  # =========================
+  mysql:
+    image: mysql:8.0
+    container_name: database-mysql-productos
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: MicroProductosDB
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-productos-data:/var/lib/mysql
+    networks:
+      - microservicios-net
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uadmin",
+          "-padmin"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # =========================
+  # RabbitMQ
+  # =========================
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-microservicios
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - microservicios-net
+
+  # =========================
+  # MicroVentas - Publisher
+  # =========================
+  microventas:
+    image: microventas-api:1.0
+    container_name: microventas-api
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/MicroVentasDB
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+
+      RABBITMQ_HOST: rabbitmq-microservicios
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: admin
+      RABBITMQ_PASSWORD: admin
+
+    ports:
+      - "8082:8080"
+    networks:
+      - microservicios-net
+
+  # =========================
+  # MicroProductos - Consumer
+  # =========================
+  microproductos:
+    build:
+      context: ./microproductos-api
+      dockerfile: Dockerfile
+    image: microproductos-api:1.0
+    container_name: microproductos-api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    environment:
+      DATABASE_URL: "mysql+pymysql://admin:admin@mysql:3306/MicroProductosDB"
+
+      RABBITMQ_HOST: rabbitmq-microservicios
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: admin
+      RABBITMQ_PASSWORD: admin
+
+    ports:
+      - "8002:8000"
+    networks:
+      - microservicios-net
+
+# =========================
+# Volúmenes
+# =========================
+volumes:
+
+  postgres-ventas-data:
+    external: true
+    name: appmicroventasapi_postgres-ventas-data
+
+  mysql-productos-data:
+    external: true
+    name: microproductos-api_mysql_productos_data
+
+  rabbitmq-data:
+
+# =========================
+# Red común
+# =========================
+networks:
+
+  microservicios-net:
+    driver: bridge

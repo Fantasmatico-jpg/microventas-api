@@ -9,6 +9,8 @@ public class VentaResponseDTO {
     private String numeroVenta;
     private LocalDate fecha;
     private String cliente;
+    private Long productoId;
+    private Integer cantidad;
     private BigDecimal total;
     private Boolean estado;
     private String observacion;
@@ -21,13 +23,18 @@ public class VentaResponseDTO {
             String numeroVenta,
             LocalDate fecha,
             String cliente,
+            Long productoId,
+            Integer cantidad,
             BigDecimal total,
             Boolean estado,
             String observacion) {
+
         this.id = id;
         this.numeroVenta = numeroVenta;
         this.fecha = fecha;
         this.cliente = cliente;
+        this.productoId = productoId;
+        this.cantidad = cantidad;
         this.total = total;
         this.estado = estado;
         this.observacion = observacion;
@@ -63,6 +70,22 @@ public class VentaResponseDTO {
 
     public void setCliente(String cliente) {
         this.cliente = cliente;
+    }
+
+    public Long getProductoId() {
+        return productoId;
+    }
+
+    public void setProductoId(Long productoId) {
+        this.productoId = productoId;
+    }
+
+    public Integer getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(Integer cantidad) {
+        this.cantidad = cantidad;
     }
 
     public BigDecimal getTotal() {

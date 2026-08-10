@@ -1,6 +1,7 @@
 package com.example.microventas.dto;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -18,6 +19,13 @@ public class VentaRequestDTO {
 
     @NotBlank(message = "El cliente es obligatorio")
     private String cliente;
+
+    @NotNull(message = "El producto es obligatorio")
+    private Long productoId;
+
+    @NotNull(message = "La cantidad es obligatoria")
+    @Min(value = 1, message = "La cantidad debe ser mayor a 0")
+    private Integer cantidad;
 
     @NotNull(message = "El total es obligatorio")
     @DecimalMin(value = "0.0", inclusive = true, message = "El total no puede ser negativo")
@@ -54,6 +62,22 @@ public class VentaRequestDTO {
 
     public void setCliente(String cliente) {
         this.cliente = cliente;
+    }
+
+    public Long getProductoId() {
+       return productoId;
+    }
+
+    public void setProductoId(Long productoId) {
+        this.productoId = productoId;
+    }
+
+    public Integer getCantidad() {
+       return cantidad;
+    }
+
+    public void setCantidad(Integer cantidad) {
+        this.cantidad = cantidad;
     }
 
     public BigDecimal getTotal() {

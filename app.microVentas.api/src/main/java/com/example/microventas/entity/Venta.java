@@ -21,6 +21,12 @@ public class Venta {
     @Column(nullable = false)
     private String cliente;
 
+    @Column(name = "producto_id", nullable = false)
+    private Long productoId;
+
+    @Column(nullable = false)
+    private Integer cantidad;
+
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal total;
 
@@ -63,6 +69,22 @@ public class Venta {
 
     public void setCliente(String cliente) {
         this.cliente = cliente;
+    }
+
+    public Long getProductoId() {
+        return productoId;
+    }
+
+    public void setProductoId(Long productoId) {
+        this.productoId = productoId;
+    }
+
+    public Integer getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(Integer cantidad) {
+        this.cantidad = cantidad;
     }
 
     public BigDecimal getTotal() {

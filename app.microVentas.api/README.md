@@ -238,10 +238,36 @@ docker push kenwaylabs/microventas-api:1.0
 
 ## Repositorios
 
-**GitHub:** agregar aquí el enlace al repositorio del proyecto.
+**GitHub:** https://github.com/Fantasmatico-jpg/microventas-api 
 
-**Docker Hub:** `kenwaylabs/microventas-api:1.0`
+**Docker Hub:** https://hub.docker.com/r/kenwaylabs/microventas-api 
+
+## Docker Hub
+
+Imagen publicada:
+
+`kenwaylabs/microventas-api:1.0`
 
 ## Autor
 
 Proyecto académico para la asignatura **Aplicaciones Distribuidas**.
+
+## Comunicación asíncrona con RabbitMQ
+
+MicroVentas funciona como Publisher dentro de la arquitectura
+asíncrona.
+
+Cuando se registra una nueva venta, el servicio guarda la
+información en PostgreSQL y genera un evento VentaCreadaEvent.
+
+El evento contiene:
+
+- ventaId
+- productoId
+- cantidad
+- fecha
+
+El evento es publicado mediante RabbitMQ utilizando:
+
+Exchange: ventas.exchange
+Routing Key: ventas.creada

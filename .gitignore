@@ -73,3 +73,11 @@ Thumbs.db
 # Maven / Spring Boot
 **/target/
 
+# Python virtual environments
+venv/
+**/venv/
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
