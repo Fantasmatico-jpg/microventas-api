@@ -1,0 +1,22 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+
+- name: microproductos-service
+  url: http://microproductos-api:8000/api/productos
+
+  routes:
+  - name: microproductos-route
+    paths:
+    - /productos
+    strip_path: true
+
+- name: microventas-service
+  url: http://microventas-api:8080/api/ventas
+
+  routes:
+  - name: microventas-route
+    paths:
+    - /ventas
+    strip_path: true
