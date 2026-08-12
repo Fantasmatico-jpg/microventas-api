@@ -17,7 +17,10 @@ public class VentaRequestDTO {
     @NotNull(message = "La fecha es obligatoria")
     private LocalDate fecha;
 
-    @NotBlank(message = "El cliente es obligatorio")
+    @NotNull(message = "El cliente es obligatorio")
+    private Long clienteId;
+
+    @NotBlank(message = "El nombre del cliente es obligatorio")
     private String cliente;
 
     @NotNull(message = "El producto es obligatorio")
@@ -56,6 +59,14 @@ public class VentaRequestDTO {
         this.fecha = fecha;
     }
 
+    public Long getClienteId() {
+        return clienteId;
+    }
+
+    public void setClienteId(Long clienteId) {
+        this.clienteId = clienteId;
+    }
+
     public String getCliente() {
         return cliente;
     }
@@ -65,7 +76,7 @@ public class VentaRequestDTO {
     }
 
     public Long getProductoId() {
-       return productoId;
+        return productoId;
     }
 
     public void setProductoId(Long productoId) {
@@ -73,7 +84,7 @@ public class VentaRequestDTO {
     }
 
     public Integer getCantidad() {
-       return cantidad;
+        return cantidad;
     }
 
     public void setCantidad(Integer cantidad) {

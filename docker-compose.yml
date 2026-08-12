@@ -1,11 +1,11 @@
 services:
 
-  # =========================
+  # =====================================================
   # PostgreSQL - MicroVentas
-  # =========================
+  # =====================================================
   postgres:
     image: postgres:16
-    container_name: database-postgres-ventas
+    restart: unless-stopped
     environment:
       POSTGRES_DB: MicroVentasDB
       POSTGRES_USER: admin
@@ -16,13 +16,17 @@ services:
       - postgres-ventas-data:/var/lib/postgresql/data
     networks:
       - microservicios-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d MicroVentasDB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
-  # =========================
+  # =====================================================
   # MySQL - MicroProductos
-  # =========================
+  # =====================================================
   mysql:
     image: mysql:8.0
-    container_name: database-mysql-productos
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -51,12 +55,38 @@ services:
       retries: 10
       start_period: 30s
 
-  # =========================
-  # RabbitMQ
-  # =========================
+  # =====================================================
+  # SQL Server - MicroClientes
+  # =====================================================
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "adminAppDist2025#"
+      MSSQL_PID: Developer
+    ports:
+      - "1434:1433"
+    volumes:
+      - sql-clientes-data:/var/opt/mssql
+    networks:
+      - microservicios-net
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'adminAppDist2025#' -C -Q 'SELECT 1' > /dev/null 2>&1"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  # =====================================================
+  # RabbitMQ - Broker
+  # =====================================================
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq-microservicios
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: admin
@@ -68,64 +98,102 @@ services:
       - rabbitmq-data:/var/lib/rabbitmq
     networks:
       - microservicios-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
-  # =========================
+  # =====================================================
   # MicroVentas - Publisher
-  # =========================
+  # =====================================================
   microventas:
-    image: microventas-api:1.0
-    container_name: microventas-api
+    build:
+      context: ./app.microVentas.api
+      dockerfile: Dockerfile
+    image: microventas-api:2.0
     restart: unless-stopped
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       SERVER_PORT: 8080
+
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/MicroVentasDB
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
 
-      RABBITMQ_HOST: rabbitmq-microservicios
-      RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: admin
-      RABBITMQ_PASSWORD: admin
-
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
     ports:
       - "8082:8080"
     networks:
       - microservicios-net
 
-  # =========================
+  # =====================================================
   # MicroProductos - Consumer
-  # =========================
+  # =====================================================
   microproductos:
     build:
       context: ./microproductos-api
       dockerfile: Dockerfile
-    image: microproductos-api:1.0
-    container_name: microproductos-api
+    image: microproductos-api:2.0
     restart: unless-stopped
     depends_on:
       mysql:
         condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     environment:
       DATABASE_URL: "mysql+pymysql://admin:admin@mysql:3306/MicroProductosDB"
-
-      RABBITMQ_HOST: rabbitmq-microservicios
+      RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: admin
       RABBITMQ_PASSWORD: admin
-
     ports:
       - "8002:8000"
     networks:
       - microservicios-net
 
-# =========================
-# Volúmenes
-# =========================
+  # =====================================================
+  # MicroClientes - Consumer
+  # =====================================================
+  microclientes:
+    build:
+      context: ./app.microCliente.api
+      dockerfile: Dockerfile
+    image: microclientes-api:2.0
+    restart: unless-stopped
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: "http://+:8080"
+
+      ConnectionStrings__BDDSqlServer: "Server=sqlserver,1433;Database=microCliente;User Id=sa;Password=adminAppDist2025#;TrustServerCertificate=True;"
+
+      RabbitMQ__Hostname: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__Username: admin
+      RabbitMQ__Password: admin
+      RabbitMQ__VirtualHost: "/"
+    ports:
+      - "8081:8080"
+    networks:
+      - microservicios-net
+
+
+# =====================================================
+# VOLUMES
+# =====================================================
 volumes:
 
   postgres-ventas-data:
@@ -138,10 +206,15 @@ volumes:
 
   rabbitmq-data:
 
-# =========================
-# Red común
-# =========================
-networks:
+  sql-clientes-data:
+    external: true
+    name: microclientesapi_sql_clientes_data
 
+
+# =====================================================
+# RED CENTRAL
+# =====================================================
+networks:
   microservicios-net:
-    driver: bridge
+    external: true
+    name: microclientesapi_net-app-distribuidas

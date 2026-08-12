@@ -18,6 +18,9 @@ public class Venta {
     @Column(nullable = false)
     private LocalDate fecha;
 
+    @Column(name = "cliente_id", nullable = false)
+    private Long clienteId;
+
     @Column(nullable = false)
     private String cliente;
 
@@ -61,6 +64,14 @@ public class Venta {
 
     public void setFecha(LocalDate fecha) {
         this.fecha = fecha;
+    }
+
+    public Long getClienteId() {
+        return clienteId;
+    }
+
+    public void setClienteId(Long clienteId) {
+        this.clienteId = clienteId;
     }
 
     public String getCliente() {

@@ -8,7 +8,9 @@ namespace app.microCliente.entities.models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+
         public bool Estado { get; set; }
+
         public DateTime Fecha { get; set; }
     }
 
@@ -36,10 +38,8 @@ namespace app.microCliente.entities.models
         [StringLength(15)]
         public string? Telefono { get; set; }
 
-        // Relación 1 a N
         public ICollection<DireccionCliente>? Direcciones { get; set; }
     }
-
 
     public class DireccionCliente : EntityBase
     {
@@ -61,9 +61,6 @@ namespace app.microCliente.entities.models
         [StringLength(10)]
         public string? CodigoPostal { get; set; }
 
-        // navegación
         public Cliente? Cliente { get; set; }
     }
-
-
 }

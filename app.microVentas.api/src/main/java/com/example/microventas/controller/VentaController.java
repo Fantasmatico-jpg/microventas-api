@@ -3,6 +3,7 @@ package com.example.microventas.controller;
 import com.example.microventas.dto.VentaRequestDTO;
 import com.example.microventas.dto.VentaResponseDTO;
 import com.example.microventas.service.IVentaService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +49,7 @@ public class VentaController {
 
     @PostMapping
     public ResponseEntity<VentaResponseDTO> crear(
-            @RequestBody VentaRequestDTO request) {
+        @Valid @RequestBody VentaRequestDTO request) {
 
         VentaResponseDTO respuesta = ventaService.crear(request);
 

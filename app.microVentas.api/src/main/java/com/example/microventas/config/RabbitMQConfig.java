@@ -1,5 +1,8 @@
 package com.example.microventas.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -23,6 +26,15 @@ public class RabbitMQConfig {
 
     @Bean
     public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        objectMapper.registerModule(new JavaTimeModule());
+
+        objectMapper.disable(
+                SerializationFeature.WRITE_DATES_AS_TIMESTAMPS
+        );
+
+        return new Jackson2JsonMessageConverter(objectMapper);
     }
 }

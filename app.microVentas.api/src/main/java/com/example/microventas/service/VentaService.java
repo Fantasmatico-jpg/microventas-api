@@ -50,20 +50,19 @@ public class VentaService implements IVentaService {
     @Override
     public VentaResponseDTO crear(VentaRequestDTO request) {
 
-        // Guardar la venta en PostgreSQL
         Venta venta = convertirAEntity(request);
 
         Venta guardada = ventaRepository.save(venta);
 
-        // Crear evento de venta
         VentaCreadaEvent evento = new VentaCreadaEvent(
                 guardada.getId(),
+                guardada.getClienteId(),
                 guardada.getProductoId(),
                 guardada.getCantidad(),
+                guardada.getTotal(),
                 guardada.getFecha()
         );
 
-        // Publicar evento en RabbitMQ
         rabbitMQPublisher.publicarVentaCreada(evento);
 
         return convertirAResponse(guardada);
@@ -82,6 +81,7 @@ public class VentaService implements IVentaService {
 
         venta.setNumeroVenta(request.getNumeroVenta());
         venta.setFecha(request.getFecha());
+        venta.setClienteId(request.getClienteId());
         venta.setCliente(request.getCliente());
         venta.setProductoId(request.getProductoId());
         venta.setCantidad(request.getCantidad());
@@ -146,6 +146,7 @@ public class VentaService implements IVentaService {
 
         venta.setNumeroVenta(request.getNumeroVenta());
         venta.setFecha(request.getFecha());
+        venta.setClienteId(request.getClienteId());
         venta.setCliente(request.getCliente());
         venta.setProductoId(request.getProductoId());
         venta.setCantidad(request.getCantidad());
