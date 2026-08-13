@@ -1,0 +1,28 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+
+  - name: microclientes-service
+    url: http://microclientes:8080/api/cliente
+    routes:
+      - name: microclientes-route
+        paths:
+          - /clientes
+        strip_path: true
+
+  - name: microproductos-service
+    url: http://microproductos:8000/api/productos
+    routes:
+      - name: microproductos-route
+        paths:
+          - /productos
+        strip_path: true
+
+  - name: microventas-service
+    url: http://microventas:8080/api/ventas
+    routes:
+      - name: microventas-route
+        paths:
+          - /ventas
+        strip_path: true
