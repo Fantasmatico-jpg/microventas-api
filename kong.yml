@@ -11,6 +11,14 @@ services:
           - /clientes
         strip_path: true
 
+  - name: microclientes-obtener-todos-service
+    url: http://microclientes:8080/api/cliente/obtener-todos
+    routes:
+      - name: microclientes-obtener-todos-route
+        paths:
+          - /clientes/obtener-todos
+        strip_path: true
+
   - name: microproductos-service
     url: http://microproductos:8000/api/productos
     routes:
